@@ -1,79 +1,93 @@
 #include "sort.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-void merge_subarr(int *subarr, int *buff, size_t front, size_t mid,
-		size_t end);
-void merge_sort_recursive(int *subarr, int *buff, size_t front, size_t end);
-void merge_sort(int *array, size_t size);
-
-/**
-  * merge_subarr - Sort a subarray of integers
-  * @subarr: A subarray of an array of integers to sort.
-  * @buff: A buffer to store the sorted subarray.
-  * @front: The front index of the array.
-  * @mid: The moddle index of the array.
-  * @end: The back index of the array.
-  */
-void merge_subarr(int *subarr, int *buff, size_t front, size_t mid,
-		size_t end)
-{
-	size_t i, j, k = 0;
-
-	printf("Merging...\n[left]: ");
-	print_array(subarr + front, mid - front);
-
-	printf("[right]: ");
-	printf_array(subarr + mid, end - mid);
-
-	for (i = front, j = mid; i < mid && j < end; k++)
-		buff[k] = (subarr[i] < subarr[j]) ? subarr[i++] : subarr[j++];
-	for (; i < mid; i++)
-		buff[k++] = subarr[i];
-	for (; j < end; j++)
-		buff[k++] = subarr[j];
-	for (i = front, k = 0; i < end; i++)
-		subarr[i] = buff[k++];
-
-	printf("[Done]: ");
-	printf_array(subarr + front, end - front);
-}
+void merge_partition(size_t low, size_t high, int *array, int *top);
 
 /**
-  * merge_sort_recursive - Implement the merge sort algorithm through recursio
-  * @subarr: A subarray of an array of integers to sort.
-  * @buff: A buffer to store the sorted result.
-  * @front: The front index of the subarray.
-  * @end: The back index of the subarray.
-  */
-void merge_sort_recursive(int *subarr, int *buff, size_t front, size_t end)
-{
-	site_t mid;
-
-	if (back - front > 1)
-	{
-		mid = front + (end - front) / 2;
-		merge_sort_recursive(subarr, buff, front, mid);
-		merge_sort_recursive(subarr, buff, mid, end);
-		merge_subarr(subarr, buff, front, mid, end);
-	}
-}
-/**
-  * merge_sort - Sort an array of integers in ascending order using the 
-  *	merge sort algorithm.
-  * @array: An array of integers.
-  * @size: The size of the array.
-  *
-  * Description: Implements the top-down merge sort algorithm.
-  */
+ * merge_sort - A function that sorts an array of integers in ascending
+ * order using the Merge sort algorithm
+ *
+ * @array: The array to be sorted
+ * @size: The size of the array
+ * Return: Nothing
+ */
 void merge_sort(int *array, size_t size)
 {
-	int *buff;
+	size_t x = 0;
+	int *top = NULL;
 
 	if (array == NULL || size < 2)
 		return;
-	buff = malloc(sizeof(int) * size);
-	if (buff == NULL)
+	top = malloc(sizeof(int) * size);
+	if (top == NULL)
 		return;
-	merge_sort_recursive(array, buff, 0, size);
+	for (; x < size; x++)
+		top[x] = array[x];
+	merge_partition(0, size, array, top);
+	free(top);
+}
 
-	free(buff);
+/**
+ * merge - A function that merges two sorted arrays
+ *
+ * @array: The array to be sorted
+ * @low: The starting index of the array
+ * @middle: The middle index of the array
+ * @high: The ending index of the array
+ * @dest: Destination for the data
+ * @src: Input data
+ * Return: Nothing
+ */
+void merge(size_t low, size_t middle, size_t high, int *dest, int *src)
+{
+	size_t i = 0, j = 0, k = 0;
+
+	printf("Merging...\n");
+	printf("[left]: ");
+	print_array(src + low, middle - low);
+	printf("[right]: ");
+	print_array(src + middle, high - middle);
+	i = low;
+	j = middle;
+	k = low;
+
+		for (; k < high; k++)
+		{
+			if (i < middle && (j >= high || src[i] <= src[j]))
+			{
+				dest[k] = src[i];
+				i++;
+			}
+			else
+			{
+				dest[k] = src[j];
+				j++;
+			}
+		}
+		printf("Done]: ");
+		print_array(dest + low, high - low);
+}
+
+/**
+ * merge_partition - A function that splits the array recursively
+ *
+ * @low: The starting index of the array
+ * @high: The ending index of the array
+ * @array: The array to be sorted
+ * @top: The copy of the array
+ * Return: Nothing
+ */
+void merge_partition(size_t low, size_t high, int *array, int *top)
+{
+	size_t middle = 0;
+
+	if (high - low < 2)
+		return;
+	middle = (low + high) / 2;
+	merge_partition(low, middle, array, top);
+	merge_partition(middle, high, array, top);
+	merge(low, middle, high, array, top);
+	for (middle = low; middle < high; middle++)
+		top[middle] = array[middle];
 }
