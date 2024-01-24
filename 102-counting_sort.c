@@ -1,58 +1,53 @@
 #include "sort.h"
+#include <stdlib.h>
 
 /**
-  * get_max - Get the maximum value in an array of integers.
-  * @array: An array of integers.
-  * @size: The size of the array.
-  *
-  * Return: The maximum integer in the array.
-  */
-int get_max(int *array, int size)
-{
-	int max, i;
-
-	for (max = array[0], i = 1; i < size; i++)
-	{
-		if (array[i] > max)
-			max = array[i];
-	}
-	return (max);
-}
-
-/**
-  * counting_sort - Sort an array of integers in ascending order
-  *	using the counting sort algorithm.
-  * @array: An array of integers.
-  * @size: The size of the array.
-  *
-  * Description: Prints the counting array after setting it up.
-  */
+ * counting_sort - A function that sorts an array of integers in ascending
+ * order using the Counting sort algorithm
+ *
+ * @array: The array to be sorted
+ * @size: The size of the array
+ * Return: Nothing
+ */
 void counting_sort(int *array, size_t size)
 {
-	int *count, *sort, max, i;
+	int i, maximum;
+	int *count = NULL, *cp = NULL;
+	size_t j, tmp, final = 0;
 
 	if (array == NULL || size < 2)
 		return;
-	sort = malloc(sizeof(int) * size);
-	if (sort == NULL)
+	cp = malloc(sizeof(int) * size);
+	if (cp == NULL)
 		return;
-	max = get_max(array, size);
-	count = malloc(sizeof(int) * (max + 1));
+	for (j = 0, maximum = 0; j < size; j++)
+	{
+		cp[j] = array[j];
+		if (array[j] > maximum)
+			maximum = array[j];
+	}
+	count = malloc(sizeof(int) * (maximum + 1));
 	if (count == NULL)
 	{
-		free(sort);
+		free(cp);
 		return;
 	}
-	for (i = 0; i < (max + 1); i++)
+	for (i = 0; i <= maximum; i++)
 		count[i] = 0;
-	for (i = 0; i < (int)size; i++)
-		count[array[i]] += 1;
-	for (i = 0; i < (max + 1); i++)
-		count[i] += count[i - 1];
-	print_array(count, max + 1);
-
-	for (i = 0; i < (int)size; i++)
-		array[i] = sort[i];
-	free(sort);
+	for (j = 0; j < size; j++)
+		count[array[j]] += 1;
+	for (i = 0; i <= maximum; i++)
+	{
+		tmp = count[i];
+		count[i] = final;
+		final += tmp;
+	}
+	for (j = 0; j < size; j++)
+	{
+		array[count[cp[j]]] = cp[j];
+		count[cp[j]] += 1;
+	}
+	print_array(count, maximum + 1);
 	free(count);
+	free(cp);
 }
